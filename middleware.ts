@@ -1,0 +1,11 @@
+import { clerkMiddleware } from "@clerk/nextjs/server";
+
+export default clerkMiddleware();
+
+// Decide which routes use Clerk auth
+export const config = {
+  matcher: [
+    // Protect all routes except static files and Next internals
+    "/((?!_next|.*\\..*).*)",
+  ],
+};

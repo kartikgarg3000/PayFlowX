@@ -9,6 +9,7 @@ datasource db {
 
 model User {
   id        String    @id @default(cuid())
+  clerkId   String    @unique
   email     String    @unique
   name      String?
   createdAt DateTime  @default(now())
@@ -18,11 +19,88 @@ model User {
 }
 
 model Merchant {
-  id           String    @id @default(cuid())
-  userId       String    @unique
+  id           String        @id @default(cuid())
+  userId       String        @unique
   businessName String
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 
-  user         User      @relation(fields: [userId], references: [id])
+  user         User          @relation(fields: [userId], references: [id])
+  campaigns    Campaign[]
+  paymentLinks PaymentLink[]  
+}
+
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum CampaignType {
+  WHATSAPP_ONLY
+  WHATSAPP_WITH_PAYMENT
+}
+
+model Campaign {
+  id           String         @id @default(cuid())
+  merchantId   String
+  name         String
+  description  String?
+  status       CampaignStatus @default(DRAFT)
+  type         CampaignType   @default(WHATSAPP_ONLY)
+  scheduledAt  DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  merchant     Merchant       @relation(fields: [merchantId], references: [id])
+  paymentLinks PaymentLink[]  
+}
+
+
+enum PaymentLinkStatus {
+  ACTIVE
+  EXPIRED
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum PaymentMethod {
+  UPI
+  CARD
+  WALLET
+}
+
+model PaymentLink {
+  id           String            @id @default(cuid())
+  merchantId   String
+  campaignId   String?
+  amount       Int
+  url          String            @unique
+  status       PaymentLinkStatus @default(ACTIVE)
+  createdAt    DateTime          @default(now())
+
+  merchant     Merchant          @relation(fields: [merchantId], references: [id])
+  campaign     Campaign?         @relation(fields: [campaignId], references: [id])
+  transactions Transaction[]
+}
+
+model Transaction {
+  id             String            @id @default(cuid())
+  paymentLinkId  String
+  amount         Int
+  method         PaymentMethod
+  status         TransactionStatus @default(PENDING)
+  riskScore      Int               @default(0)
+  attempts       Int               @default(1)
+  metadata       Json?
+  createdAt      DateTime          @default(now())
+
+  paymentLink    PaymentLink       @relation(fields: [paymentLinkId], references: [id])
 }

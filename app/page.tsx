@@ -22,6 +22,18 @@ export default function HomePage() {
             >
               Go to dashboard
             </Link>
+            <Link
+              href="/sign-in"
+              className="text-xs text-slate-400 hover:text-slate-200"
+            >
+              Sign in
+            </Link>
+            <Link
+              href="/sign-up"
+              className="text-xs text-slate-400 hover:text-slate-200"
+            >
+              Get started
+            </Link>
           </div>
         </div>
       </header>
